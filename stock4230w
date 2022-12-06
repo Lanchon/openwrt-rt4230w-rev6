@@ -1,0 +1,37 @@
+#!/bin/bash
+
+
+# FW ver: 1.0.11
+#USERNAME=4230w
+#PASSWORD=admin
+
+# FW ver: 1.1.11 through 1.1.16
+#USERNAME=4230w
+#PASSWORD=linuxbox
+
+# FW ver: 1.1.28 and later
+#USERNAME=technician
+#PASSWORD=linuxbox
+
+
+IP=192.168.1.1
+
+
+HOST="${USERNAME}@${IP}"
+
+
+if [[ "$USERNAME" == "" ]]; then
+	echo "error: undefined ssh parameters; please configure them in file 'stock4230w'"
+	exit 1
+fi
+
+cmd="$1"
+shift
+
+eval sshpass -p "$PASSWORD" "$cmd" \
+	-o KexAlgorithms=diffie-hellman-group14-sha1,diffie-hellman-group1-sha1 \
+	-o HostKeyAlgorithms=ssh-rsa,ssh-dss \
+	-o StrictHostKeyChecking=no \
+	-o UserKnownHostsFile=/dev/null \
+	"$@"
+
