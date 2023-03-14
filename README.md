@@ -10,6 +10,10 @@
 - Ethernet connection to the router (Wi-Fi connection should also work but has not been tested).
 - Installed software: ssh, scp, and sshpass. (A TFTP server is not required.)
 
+**Note:** While issuing the SCP commands detailed bellow, you might encounter errors related to option `-O` not being recongnized. In such a case, simply leave out the `-O` option from all SCP commnands.
+This happens if you are using an SCP version older than 8.7 (use `ssh -V` to check your version). The option is required on recent SCP versions due to deprecation of the old SCP/RCP protocol. 
+More details [here](https://github.com/Lanchon/openwrt-rt4230w-rev6/pull/3#issuecomment-1472474007).
+
 ### Preparation
 
 1. Clone this repository.
@@ -35,13 +39,13 @@ Linux version 3.14.77 (jenkins@ci-server) (gcc version 5.2.0 (OpenWrt GCC 5.2.0 
 1. Create and transfer backups of all MTD partitions:
 ```
 ./stock4230w ssh '$HOST sh' <mtd-backup.sh
-./stock4230w scp '$HOST:/tmp/lanchon/mtd-backup.tar .'
+./stock4230w scp -O '$HOST:/tmp/lanchon/mtd-backup.tar .'
 ./stock4230w ssh '$HOST "rm /tmp/lanchon/mtd-backup.tar"'
 ```
 2. Create and transfer backups of all UBI volumes:
 ```
 ./stock4230w ssh '$HOST sh' <ubi-backup.sh
-./stock4230w scp '$HOST:/tmp/lanchon/ubi-backup.tar .'
+./stock4230w scp -O '$HOST:/tmp/lanchon/ubi-backup.tar .'
 ./stock4230w ssh '$HOST "rm /tmp/lanchon/ubi-backup.tar"'
 ```
 - You might need these backups down the road, so store them.
@@ -52,7 +56,7 @@ Make sure you have backups of the stock firmware (see previous section); each de
 
 1. Install the initramfs recovery image:
 ```
-./stock4230w scp 'openwrt-[...]-askey_rt4230w-rev6-initramfs-uImage $HOST:/tmp/recovery.bin'
+./stock4230w scp -O 'openwrt-[...]-askey_rt4230w-rev6-initramfs-uImage $HOST:/tmp/recovery.bin'
 ./stock4230w ssh '$HOST sh' <install-recovery.sh
 ```
 - Note that the router has two copies of the stock OS. Depending on which one is currently running, the install script might need to install the recovery image in an area that will be erased
@@ -78,7 +82,7 @@ ssh root@192.168.1.1 'ubirmvol /dev/ubi0 -N rootfs_data && ubimkvol /dev/ubi0 -N
 6. Reboot the router in normal mode and reconnect to it if necessary.
 7. Write the recovery image to the UBI volume with:
 ```
-scp openwrt-[...]-askey_rt4230w-rev6-initramfs-uImage root@192.168.1.1:/tmp/recovery.bin
+scp -O openwrt-[...]-askey_rt4230w-rev6-initramfs-uImage root@192.168.1.1:/tmp/recovery.bin
 ssh root@192.168.1.1 'ubiupdatevol /dev/ubi0_9 /tmp/recovery.bin && rm /tmp/recovery.bin'
 ```
 8. Restore the router configuration if applicable.
@@ -129,7 +133,7 @@ There is usually no reason to upgrade the recovery image. This is provided for c
 1. [Download](https://firmware-selector.openwrt.org/?target=ipq806x%2Fgeneric&id=askey_rt4230w-rev6) the OpenWrt initramfs (kernel) image for this router.
 2. Pop up a terminal and write the recovery image (replace 192.168.1.1 with the address of your router):
 ```
-scp openwrt-[...]-askey_rt4230w-rev6-initramfs-uImage root@192.168.1.1:/tmp/recovery.bin
+scp -O openwrt-[...]-askey_rt4230w-rev6-initramfs-uImage root@192.168.1.1:/tmp/recovery.bin
 ssh root@192.168.1.1 'ubiupdatevol /dev/ubi0_9 /tmp/recovery.bin && rm /tmp/recovery.bin'
 ```
 
